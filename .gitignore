@@ -1,0 +1,17 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.DS_Store
+.ipynb_checkpoints/
+
+# pipeline artifacts — never commit panels or factor outputs
+panel.csv
+panel.parquet
+factors/
+factors.csv
+factors.parquet
+cont.csv
+contracts.csv
+ic*.csv
+*.local.*

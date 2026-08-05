@@ -1,0 +1,4 @@
+interface:
+  display_name: "Futures CTA Alpha"
+  short_description: "Commodity-futures CTA factor library — a date x variety x factor panel"
+  default_prompt: "Use $futures-cta-alpha to compute the commodity-futures CTA factor panel (momentum, carry, term structure, inventory, positioning) and check factor IC."

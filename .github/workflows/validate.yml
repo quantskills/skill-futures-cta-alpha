@@ -1,0 +1,35 @@
+name: validate
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install -r requirements.txt
+      - name: unit tests (incl. random-walk null control for IC significance)
+        run: python -B -m unittest discover -s tests -v
+
+  publish-guard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: refuse to ship an unfilled author placeholder
+        run: |
+          if grep -rn "GITHUB_USERNAME_TODO" . --exclude-dir=.git; then
+            echo "::error::SKILL.md still carries the author placeholder. Replace"
+            echo "::error::GITHUB_USERNAME_TODO with the real GitHub username before publishing."
+            exit 1
+          fi
+      - name: refuse to ship a personal email address
+        run: |
+          if grep -rnE "[A-Za-z0-9._%+-]+@(gmail|qq|163|126|outlook|hotmail)\.com" . --exclude-dir=.git; then
+            echo "::error::a personal email address would be published; use a GitHub username instead."
+            exit 1
+          fi

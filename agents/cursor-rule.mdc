@@ -1,0 +1,42 @@
+---
+description: Use the Futures CTA Alpha skill to compute a commodity-futures factor panel (momentum, carry, term structure, inventory, positioning) for the factor toolchain.
+alwaysApply: false
+---
+
+# Futures CTA Alpha Skill
+
+When the user asks for commodity-futures factors, CTA signals, 时序/截面动量、carry/展期、
+期限结构、库存/仓单、持仓因子, a factor panel for backtesting, or factor IC on futures,
+use the local skill package.
+
+Preferred local project path:
+
+```text
+.cursor/skills/futures-cta-alpha
+```
+
+## How to use
+
+1. Read `SKILL.md` — the workflow and the boundary with `skill-futures-deepview-analyst`
+   (that skill writes human-readable 研判报告 from the same data; this one emits a
+   **structured factor panel** for `factor-evaluate` / `ic-analysis` / `backtest`).
+2. Read `references/factor-catalog.md` for each factor's formula, data interface, and
+   **measured** direction — the priors were recalibrated against real data.
+3. Run the pipeline:
+   ```bash
+   python scripts/build_continuous.py --contracts contracts.csv --out cont.csv   # optional
+   python scripts/fetch_futures_panel.py --varieties RB M CU --start 20220101 --end 20241231 --out panel.parquet
+   python scripts/compute_factors.py --panel panel.csv --out factors.csv
+   python scripts/validate_factors.py factors.csv
+   python scripts/ic_check.py --factors factors.csv --panel panel.csv --horizons 5 10 20
+   ```
+   Pandadata is only needed for `fetch_futures_panel.py`. Price + carry factors run off any
+   daily source — feed your own panel straight to `compute_factors.py`.
+4. **Two hard rules from the measured evidence** (`references/l3-evidence-ic.md`):
+   - **China commodities are a reversal market.** 1–3 month momentum has IC −7% (t=−11) —
+     use it inverted. Global "momentum + long backwardation" priors fail here; carry is
+     INVERTED (contango outperforms).
+   - **Significant IC ≠ tradeable.** `lowvol` has the strongest IC (t=5.7) but ~0 net Sharpe.
+     Confirm direction with `ic_check.py`, confirm tradeability with a cost-aware backtest.
+5. This skill computes factor values only — no 研判报告 (hand off to `futures-deepview-analyst`),
+   no strategy code (hand off to `ssquant-*`), no investment advice.
