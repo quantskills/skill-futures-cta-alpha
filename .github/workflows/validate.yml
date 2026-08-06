@@ -20,16 +20,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: refuse to ship an unfilled author placeholder
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: author attribution must be a real GitHub username
+        run: python .github/check_attribution.py
+      - name: no personal email address in tracked content
         run: |
-          if grep -rn "GITHUB_USERNAME_TODO" . --exclude-dir=.git; then
-            echo "::error::SKILL.md still carries the author placeholder. Replace"
-            echo "::error::GITHUB_USERNAME_TODO with the real GitHub username before publishing."
-            exit 1
-          fi
-      - name: refuse to ship a personal email address
-        run: |
-          if grep -rnE "[A-Za-z0-9._%+-]+@(gmail|qq|163|126|outlook|hotmail)\.com" . --exclude-dir=.git; then
+          if grep -rnE "[A-Za-z0-9._%+-]+@(gmail|qq|163|126|outlook|hotmail)\.com" . \
+               --exclude-dir=.git --exclude-dir=.github; then
             echo "::error::a personal email address would be published; use a GitHub username instead."
             exit 1
           fi
